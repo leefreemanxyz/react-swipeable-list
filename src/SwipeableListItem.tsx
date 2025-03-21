@@ -1,32 +1,31 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import { PureComponent } from "react";
 
-import './SwipeableListItem.css';
+import "./SwipeableListItem.css";
 
 export const ActionAnimations = {
-  RETURN: Symbol('Return'),
-  REMOVE: Symbol('Remove'),
-  NONE: Symbol('None')
+  RETURN: Symbol("Return"),
+  REMOVE: Symbol("Remove"),
+  NONE: Symbol("None"),
 };
 
-const SwipeActionPropType = PropTypes.shape({
-  action: PropTypes.func.isRequired,
-  actionAnimation: PropTypes.oneOf(Object.values(ActionAnimations)),
-  content: PropTypes.node.isRequired
-});
+interface SwipeAction {
+  action: () => void;
+  actionAnimation: (typeof ActionAnimations)[keyof typeof ActionAnimations];
+  content: React.ReactNode;
+}
 
 const DragDirection = {
   UP: 1,
   DOWN: 2,
   LEFT: 3,
   RIGHT: 4,
-  UNKNOWN: 5
+  UNKNOWN: 5,
 };
 
 const FPS_INTERVAL = 1000 / 60;
 
 class SwipeableListItem extends PureComponent {
-  constructor(props) {
+  constructor(props: SwipeableListItemProps) {
     super(props);
 
     this.contentLeft = null;
@@ -58,13 +57,13 @@ class SwipeableListItem extends PureComponent {
   }
 
   componentDidMount() {
-    this.wrapper.addEventListener('mousedown', this.handleDragStartMouse);
+    this.wrapper.addEventListener("mousedown", this.handleDragStartMouse);
 
-    this.wrapper.addEventListener('touchstart', this.handleDragStartTouch);
-    this.wrapper.addEventListener('touchend', this.handleDragEndTouch);
-    this.wrapper.addEventListener('touchmove', this.handleTouchMove, {
+    this.wrapper.addEventListener("touchstart", this.handleDragStartTouch);
+    this.wrapper.addEventListener("touchend", this.handleDragEndTouch);
+    this.wrapper.addEventListener("touchmove", this.handleTouchMove, {
       capture: true,
-      passive: false
+      passive: false,
     });
   }
 
@@ -75,28 +74,28 @@ class SwipeableListItem extends PureComponent {
       this.requestedAnimationFrame = null;
     }
 
-    this.wrapper.removeEventListener('mousedown', this.handleDragStartMouse);
+    this.wrapper.removeEventListener("mousedown", this.handleDragStartMouse);
 
-    this.wrapper.removeEventListener('touchstart', this.handleDragStartTouch);
-    this.wrapper.removeEventListener('touchend', this.handleDragEndTouch);
-    this.wrapper.removeEventListener('touchmove', this.handleTouchMove, {
+    this.wrapper.removeEventListener("touchstart", this.handleDragStartTouch);
+    this.wrapper.removeEventListener("touchend", this.handleDragEndTouch);
+    this.wrapper.removeEventListener("touchmove", this.handleTouchMove, {
       capture: true,
-      passive: false
+      passive: false,
     });
   }
 
-  handleDragStartMouse = event => {
-    window.addEventListener('mouseup', this.handleDragEndMouse);
-    window.addEventListener('mousemove', this.handleMouseMove);
+  handleDragStartMouse = (event) => {
+    window.addEventListener("mouseup", this.handleDragEndMouse);
+    window.addEventListener("mousemove", this.handleMouseMove);
 
-    this.wrapper.addEventListener('mouseup', this.handleDragEndMouse);
-    this.wrapper.addEventListener('mousemove', this.handleMouseMove);
+    this.wrapper.addEventListener("mouseup", this.handleDragEndMouse);
+    this.wrapper.addEventListener("mousemove", this.handleMouseMove);
 
     this.handleDragStart(event);
   };
 
-  handleDragStartTouch = event => {
-    window.addEventListener('touchend', this.handleDragEndTouch);
+  handleDragStartTouch = (event) => {
+    window.addEventListener("touchend", this.handleDragEndTouch);
 
     const touch = event.targetTouches[0];
     this.handleDragStart(touch);
@@ -106,20 +105,20 @@ class SwipeableListItem extends PureComponent {
     this.resetState();
     this.dragStartPoint = { x: clientX, y: clientY };
 
-    this.listElement.className = 'swipeable-list-item__content';
+    this.listElement.className = "swipeable-list-item__content";
     if (this.contentLeft !== null) {
-      this.contentLeft.className = 'swipeable-list-item__content-left';
+      this.contentLeft.className = "swipeable-list-item__content-left";
     }
 
     if (this.contentRight !== null) {
-      this.contentRight.className = 'swipeable-list-item__content-right';
+      this.contentRight.className = "swipeable-list-item__content-right";
     }
 
     this.startTime = Date.now();
     this.scheduleUpdatePosition();
   };
 
-  handleMouseMove = event => {
+  handleMouseMove = (event) => {
     if (this.dragStartedWithinItem()) {
       const { clientX, clientY } = event;
 
@@ -135,7 +134,7 @@ class SwipeableListItem extends PureComponent {
     }
   };
 
-  handleTouchMove = event => {
+  handleTouchMove = (event) => {
     if (this.dragStartedWithinItem()) {
       const { clientX, clientY } = event.targetTouches[0];
 
@@ -156,19 +155,19 @@ class SwipeableListItem extends PureComponent {
   };
 
   handleDragEndMouse = () => {
-    window.removeEventListener('mouseup', this.handleDragEndMouse);
-    window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener("mouseup", this.handleDragEndMouse);
+    window.removeEventListener("mousemove", this.handleMouseMove);
 
     if (this.wrapper) {
-      this.wrapper.removeEventListener('mouseup', this.handleDragEndMouse);
-      this.wrapper.removeEventListener('mousemove', this.handleMouseMove);
+      this.wrapper.removeEventListener("mouseup", this.handleDragEndMouse);
+      this.wrapper.removeEventListener("mousemove", this.handleMouseMove);
     }
 
     this.handleDragEnd();
   };
 
   handleDragEndTouch = () => {
-    window.removeEventListener('touchend', this.handleDragEndTouch);
+    window.removeEventListener("touchend", this.handleDragEndTouch);
 
     this.handleDragEnd();
   };
@@ -178,30 +177,30 @@ class SwipeableListItem extends PureComponent {
 
     if (listElement) {
       listElement.className =
-        'swipeable-list-item__content swipeable-list-item__content--return';
-      listElement.style.transform = 'translateX(0px)';
+        "swipeable-list-item__content swipeable-list-item__content--return";
+      listElement.style.transform = "translateX(0px)";
     }
 
     // hide backgrounds
     if (contentLeft !== null) {
       contentLeft.style.opacity = 0;
       contentLeft.className =
-        'swipeable-list-item__content-left swipeable-list-item__content-left--return';
+        "swipeable-list-item__content-left swipeable-list-item__content-left--return";
     }
 
     if (contentRight !== null) {
       contentRight.style.opacity = 0;
       contentRight.className =
-        'swipeable-list-item__content-right swipeable-list-item__content-right--return';
+        "swipeable-list-item__content-right swipeable-list-item__content-right--return";
     }
   };
 
-  playRemoveAnimation = direction => {
+  playRemoveAnimation = (direction) => {
     const { listElement } = this;
 
     if (listElement) {
       listElement.className =
-        'swipeable-list-item__content swipeable-list-item__content--remove';
+        "swipeable-list-item__content swipeable-list-item__content--remove";
       listElement.style.transform = `translateX(${
         listElement.offsetWidth * (direction === DragDirection.LEFT ? -1 : 1)
       }px)`;
@@ -234,14 +233,14 @@ class SwipeableListItem extends PureComponent {
         if (left < listElement.offsetWidth * threshold * -1) {
           this.playActionAnimation(
             swipeLeft.actionAnimation,
-            DragDirection.LEFT
+            DragDirection.LEFT,
           );
           this.handleSwipedLeft();
           actionTriggered = true;
         } else if (left > listElement.offsetWidth * threshold) {
           this.playActionAnimation(
             swipeRight.actionAnimation,
-            DragDirection.RIGHT
+            DragDirection.RIGHT,
           );
           this.handleSwipedRight();
           actionTriggered = true;
@@ -384,7 +383,7 @@ class SwipeableListItem extends PureComponent {
         if (listElementWidth !== 0) {
           const swipeDistance = Math.max(
             0,
-            listElementWidth - Math.abs(this.left)
+            listElementWidth - Math.abs(this.left),
           );
 
           swipeDistancePercent =
@@ -404,12 +403,12 @@ class SwipeableListItem extends PureComponent {
           this.left < 0 ? this.contentRight : this.contentLeft;
 
         if (contentToHide) {
-          contentToHide.style.opacity = '0';
+          contentToHide.style.opacity = "0";
         }
       }
 
       if (opacity >= 1) {
-        contentToShow.style.opacity = '1';
+        contentToShow.style.opacity = "1";
       }
 
       this.startTime = Date.now();
@@ -432,10 +431,10 @@ class SwipeableListItem extends PureComponent {
     }
   };
 
-  bindContentLeft = ref => (this.contentLeft = ref);
-  bindContentRight = ref => (this.contentRight = ref);
-  bindListElement = ref => (this.listElement = ref);
-  bindWrapper = ref => (this.wrapper = ref);
+  bindContentLeft = (ref) => (this.contentLeft = ref);
+  bindContentRight = (ref) => (this.contentRight = ref);
+  bindListElement = (ref) => (this.listElement = ref);
+  bindWrapper = (ref) => (this.wrapper = ref);
 
   render() {
     const { children, swipeLeft, swipeRight } = this.props;
@@ -472,18 +471,17 @@ class SwipeableListItem extends PureComponent {
   }
 }
 
-SwipeableListItem.propTypes = {
-  blockSwipe: PropTypes.bool,
-  children: PropTypes.node.isRequired,
-  swipeLeft: SwipeActionPropType,
-  swipeRight: SwipeActionPropType,
-  scrollStartThreshold: PropTypes.number,
-  swipeStartThreshold: PropTypes.number,
-  threshold: PropTypes.number,
-
-  onSwipeEnd: PropTypes.func,
-  onSwipeProgress: PropTypes.func,
-  onSwipeStart: PropTypes.func
-};
+interface SwipeableListItemProps {
+  blockSwipe?: boolean;
+  children: React.ReactNode;
+  swipeLeft?: SwipeAction;
+  swipeRight?: SwipeAction;
+  scrollStartThreshold?: number;
+  swipeStartThreshold?: number;
+  threshold?: number;
+  onSwipeEnd?: () => void;
+  onSwipeProgress?: (progress: number) => void;
+  onSwipeStart?: () => void;
+}
 
 export default SwipeableListItem;

@@ -1,4 +1,4 @@
-import { FunctionComponent, PureComponent, ReactNode } from 'react';
+import { FunctionComponent, PureComponent, ReactNode } from "react";
 
 export enum ActionAnimations {
   /**
@@ -12,7 +12,7 @@ export enum ActionAnimations {
   /**
    * Item stays in place it was dragged to.
    */
-  NONE
+  NONE,
 }
 
 interface ISwipeActionProps {
@@ -39,7 +39,7 @@ interface ISwipeableListItemProps {
    * If set to `true` all defined swipe actions are blocked.
    */
   blockSwipe?: boolean;
-   /**
+  /**
    * Content that is visible by default and swipeable to reveal the left and right views.
    */
   children: ReactNode;

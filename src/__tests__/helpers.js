@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent } from "@testing-library/react";
 
 export const DELTA = 20;
 
@@ -10,7 +10,7 @@ export const Direction = {
   South: 5,
   SouthWest: 6,
   West: 7,
-  NorthWest: 8
+  NorthWest: 8,
 };
 
 const startPoint = () => ({ clientX: 50, clientY: 25 });
@@ -57,55 +57,55 @@ export const makeTouchGesture = (container, directions) => {
   let point = startPoint();
 
   fireEvent.touchStart(container, {
-    targetTouches: [point]
+    targetTouches: [point],
   });
 
   for (let i = 0; i < directions.length; i++) {
     point = movePoint(point, directions[i]);
     fireEvent.touchMove(container, {
-      targetTouches: [point]
+      targetTouches: [point],
     });
   }
 
   fireEvent.touchEnd(container, {
-    targetTouches: [point]
+    targetTouches: [point],
   });
 
   return point;
 };
 
-export const swipeLeftMouse = container => {
+export const swipeLeftMouse = (container) => {
   fireEvent.mouseDown(container, { clientX: 250, clientY: 20 });
   fireEvent.mouseMove(container, { clientX: 100, clientY: 20 });
   fireEvent.mouseUp(container, { clientX: 100, clientY: 20 });
 };
 
-export const swipeRightMouse = container => {
+export const swipeRightMouse = (container) => {
   fireEvent.mouseDown(container, { clientX: 250, clientY: 20 });
   fireEvent.mouseMove(container, { clientX: 350, clientY: 20 });
   fireEvent.mouseUp(container, { clientX: 350, clientY: 20 });
 };
 
-export const swipeLeftTouch = container => {
+export const swipeLeftTouch = (container) => {
   fireEvent.touchStart(container, {
-    targetTouches: [{ clientX: 250, clientY: 20 }]
+    targetTouches: [{ clientX: 250, clientY: 20 }],
   });
   fireEvent.touchMove(container, {
-    targetTouches: [{ clientX: 100, clientY: 20 }]
+    targetTouches: [{ clientX: 100, clientY: 20 }],
   });
   fireEvent.touchEnd(container, {
-    targetTouches: [{ clientX: 100, clientY: 20 }]
+    targetTouches: [{ clientX: 100, clientY: 20 }],
   });
 };
 
-export const swipeRightTouch = container => {
+export const swipeRightTouch = (container) => {
   fireEvent.touchStart(container, {
-    targetTouches: [{ clientX: 250, clientY: 20 }]
+    targetTouches: [{ clientX: 250, clientY: 20 }],
   });
   fireEvent.touchMove(container, {
-    targetTouches: [{ clientX: 350, clientY: 20 }]
+    targetTouches: [{ clientX: 350, clientY: 20 }],
   });
   fireEvent.touchEnd(container, {
-    targetTouches: [{ clientX: 350, clientY: 20 }]
+    targetTouches: [{ clientX: 350, clientY: 20 }],
   });
 };
