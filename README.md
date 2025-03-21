@@ -13,8 +13,8 @@
 
 <hr />
 
-[![Actions Status](https://github.com/sandstreamdev/react-swipeable-list/workflows/Node%20CI/badge.svg)](https://github.com/sandstreamdev/react-swipeable-list/actions)
-![GitHub Release Date](https://img.shields.io/github/release-date/sandstreamdev/react-swipeable-list)
+[![Actions Status](https://github.com/leefreemanxyz/react-swipeable-list/workflows/Node%20CI/badge.svg)](https://github.com/leefreemanxyz/react-swipeable-list/actions)
+![GitHub Release Date](https://img.shields.io/github/release-date/leefreemanxyz/react-swipeable-list)
 [![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg?style=flat-square)](#contributors-)
 
 ## React Swipeable List component
@@ -23,39 +23,42 @@ A control to render list with swipeable items. Items can have action on left and
 
 ## Demo
 
-Check [working example page](https://sandstreamdev.github.io/react-swipeable-list/) or experiment on:
+Check [working example page](https://leefreemanxyz.github.io/react-swipeable-list/) or experiment on:
 
 [![Edit react-swipeable-list](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/sandstreamdev/react-swipeable-list/tree/master/examples)
 
 ## Installation
 
 ```bash
-npm install @sandstreamdev/react-swipeable-list
+npm install @leefreemanxyz/react-swipeable-list
 # or via yarn
-yarn add @sandstreamdev/react-swipeable-list
+yarn add @leefreemanxyz/react-swipeable-list
 ```
 
 ## Usage
 
 ```jsx
-import { SwipeableList, SwipeableListItem } from '@sandstreamdev/react-swipeable-list';
-import '@sandstreamdev/react-swipeable-list/dist/styles.css';
+import {
+  SwipeableList,
+  SwipeableListItem,
+} from "@leefreemanxyz/react-swipeable-list";
+import "@leefreemanxyz/react-swipeable-list/dist/styles.css";
 
 <SwipeableList>
   <SwipeableListItem
     swipeLeft={{
       content: <div>Revealed content during swipe</div>,
-      action: () => console.info('swipe action triggered')
+      action: () => console.info("swipe action triggered"),
     }}
     swipeRight={{
       content: <div>Revealed content during swipe</div>,
-      action: () => console.info('swipe action triggered')
+      action: () => console.info("swipe action triggered"),
     }}
-    onSwipeProgress={progress => console.info(`Swipe progress: ${progress}%`)}
+    onSwipeProgress={(progress) => console.info(`Swipe progress: ${progress}%`)}
   >
     <div>Item name</div>
   </SwipeableListItem>
-</SwipeableList>
+</SwipeableList>;
 ```
 
 or use function as children pattern if other container is needed (check animation and styled container examples). Note that in this case you need to provide list wrapper and pass default `className` props to have same behaviour. Default `SwipeableList` styles are passed in `className` prop.
@@ -67,11 +70,11 @@ or use function as children pattern if other container is needed (check animatio
       <SwipeableListItem
         swipeLeft={{
           content: <div>Revealed content during swipe</div>,
-          action: () => console.info('swipe action triggered')
+          action: () => console.info("swipe action triggered"),
         }}
         swipeRight={{
           content: <div>Revealed content during swipe</div>,
-          action: () => console.info('swipe action triggered')
+          action: () => console.info("swipe action triggered"),
         }}
         {...rest}
       >
@@ -141,7 +144,6 @@ Data for defining left swipe action and rendering content after item is swiped. 
 Type: `function` (required)
 
 Callback function that should be run when swipe is done beyond threshold.
-
 
 #### actionAnimation
 

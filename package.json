@@ -61,8 +61,8 @@
     "vitest": "^3.0.9"
   },
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
+    "build": "vite build",
+    "dev": "vite dev",
     "lint": "eslint --ext .js --max-warnings=0 --cache ./",
     "stylelint": "stylelint src/**/*.css examples/**/*.css --cache",
     "prettier": "prettier src/**/*.js examples/**/*.js --check",
