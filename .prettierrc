@@ -1,6 +1,1 @@
-{
-  "arrowParens": "avoid",
-  "endOfLine": "auto",
-  "singleQuote": true,
-  "trailingComma": "none"
-}
+{}

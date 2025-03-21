@@ -1,19 +1,18 @@
-import '@testing-library/jest-dom/extend-expect';
-import React from 'react';
-import { render, cleanup } from '@testing-library/react';
-
-import SwipeableList from '../SwipeableList';
-import SwipeableListItem from '../SwipeableListItem';
+import "@testing-library/jest-dom/vitest";
+import { cleanup, render } from "@testing-library/react";
+import { afterEach, expect, test, vi } from "vitest";
+import SwipeableList from "../SwipeableList";
+import SwipeableListItem from "../SwipeableListItem";
 import {
   DELTA,
   Direction,
   makeMouseGesture,
-  makeTouchGesture
-} from './helpers';
+  makeTouchGesture,
+} from "./helpers";
 
 afterEach(cleanup);
 
-test('list rendering with items', () => {
+test("list rendering with items", () => {
   const { container, getByText } = render(
     <SwipeableList>
       <SwipeableListItem>
@@ -22,18 +21,18 @@ test('list rendering with items', () => {
       <SwipeableListItem>
         <span>Item content 2</span>
       </SwipeableListItem>
-    </SwipeableList>
+    </SwipeableList>,
   );
 
-  expect(getByText('Item content 1')).toBeInTheDocument();
-  expect(getByText('Item content 2')).toBeInTheDocument();
-  expect(container.firstChild).toHaveClass('swipeable-list');
+  expect(getByText("Item content 1")).toBeInTheDocument();
+  expect(getByText("Item content 2")).toBeInTheDocument();
+  expect(container.firstChild).toHaveClass("swipeable-list");
 });
 
-test('list rendering with items when child as function', () => {
+test("list rendering with items when child as function", () => {
   const { container, getByText } = render(
     <SwipeableList>
-      {props => (
+      {(props) => (
         <>
           <SwipeableListItem {...props}>
             <span>Item content 1</span>
@@ -43,15 +42,15 @@ test('list rendering with items when child as function', () => {
           </SwipeableListItem>
         </>
       )}
-    </SwipeableList>
+    </SwipeableList>,
   );
 
-  expect(getByText('Item content 1')).toBeInTheDocument();
-  expect(getByText('Item content 2')).toBeInTheDocument();
-  expect(container.firstChild).not.toHaveClass('swipeable-list');
+  expect(getByText("Item content 1")).toBeInTheDocument();
+  expect(getByText("Item content 2")).toBeInTheDocument();
+  expect(container.firstChild).not.toHaveClass("swipeable-list");
 });
 
-test('passing className to child function', () => {
+test("passing className to child function", () => {
   const { container, getByTestId } = render(
     <SwipeableList>
       {({ className }) => (
@@ -59,35 +58,35 @@ test('passing className to child function', () => {
           <div className={className} data-testid="tested-div" />
         </div>
       )}
-    </SwipeableList>
+    </SwipeableList>,
   );
 
-  expect(container.firstChild).not.toHaveClass('swipeable-list');
-  expect(getByTestId('tested-div')).toHaveClass('swipeable-list');
+  expect(container.firstChild).not.toHaveClass("swipeable-list");
+  expect(getByTestId("tested-div")).toHaveClass("swipeable-list");
 });
 
-test('blocking swipe on scroll', () => {
-  const callbackLeft = jest.fn();
-  const callbackRight = jest.fn();
+test("blocking swipe on scroll", () => {
+  const callbackLeft = vi.fn();
+  const callbackRight = vi.fn();
 
   const { queryAllByTestId } = render(
     <SwipeableList>
       <SwipeableListItem
         swipeLeft={{
           content: <span>Left swipe content</span>,
-          action: callbackLeft
+          action: callbackLeft,
         }}
         swipeRight={{
           content: <span>Right swipe content</span>,
-          action: callbackRight
+          action: callbackRight,
         }}
       >
         <span>Item content 1</span>
       </SwipeableListItem>
-    </SwipeableList>
+    </SwipeableList>,
   );
 
-  const listItem = queryAllByTestId('content')[0];
+  const listItem = queryAllByTestId("content")[0];
 
   makeMouseGesture(listItem, [Direction.North]);
   makeMouseGesture(listItem, [Direction.NorthEast]);
@@ -144,28 +143,28 @@ test('blocking swipe on scroll', () => {
   expect(callbackLeft).toHaveBeenCalledTimes(2);
 });
 
-test('swipe start threshold', () => {
-  const callbackLeft = jest.fn();
-  const callbackRight = jest.fn();
+test("swipe start threshold", () => {
+  const callbackLeft = vi.fn();
+  const callbackRight = vi.fn();
 
   const { queryAllByTestId } = render(
     <SwipeableList swipeStartThreshold={DELTA + 1}>
       <SwipeableListItem
         swipeLeft={{
           content: <span>Left swipe content</span>,
-          action: callbackLeft
+          action: callbackLeft,
         }}
         swipeRight={{
           content: <span>Right swipe content</span>,
-          action: callbackRight
+          action: callbackRight,
         }}
       >
         <span>Item content 1</span>
       </SwipeableListItem>
-    </SwipeableList>
+    </SwipeableList>,
   );
 
-  const listItem = queryAllByTestId('content')[0];
+  const listItem = queryAllByTestId("content")[0];
 
   makeMouseGesture(listItem, [Direction.East]);
   expect(callbackRight).toHaveBeenCalledTimes(0);
@@ -180,52 +179,52 @@ test('swipe start threshold', () => {
   expect(callbackLeft).toHaveBeenCalledTimes(0);
 });
 
-test('blocking scroll on swipe', () => {
-  const callbackLeft = jest.fn();
-  const callbackRight = jest.fn();
+test("blocking scroll on swipe", () => {
+  const callbackLeft = vi.fn();
+  const callbackRight = vi.fn();
 
   const { queryAllByTestId } = render(
     <SwipeableList scrollStartThreshold={DELTA + 1}>
       <SwipeableListItem
         swipeLeft={{
           content: <span>Left swipe content</span>,
-          action: callbackLeft
+          action: callbackLeft,
         }}
         swipeRight={{
           content: <span>Right swipe content</span>,
-          action: callbackRight
+          action: callbackRight,
         }}
       >
         <span>Item content 1</span>
       </SwipeableListItem>
-    </SwipeableList>
+    </SwipeableList>,
   );
 
-  const listItem = queryAllByTestId('content')[0];
+  const listItem = queryAllByTestId("content")[0];
 
   makeMouseGesture(listItem, [
     Direction.North,
     Direction.East,
     Direction.East,
-    Direction.East
+    Direction.East,
   ]);
   makeMouseGesture(listItem, [
     Direction.South,
     Direction.East,
     Direction.East,
-    Direction.East
+    Direction.East,
   ]);
   makeMouseGesture(listItem, [
     Direction.North,
     Direction.West,
     Direction.West,
-    Direction.West
+    Direction.West,
   ]);
   makeMouseGesture(listItem, [
     Direction.South,
     Direction.West,
     Direction.West,
-    Direction.West
+    Direction.West,
   ]);
 
   expect(callbackLeft).toHaveBeenCalledTimes(2);
@@ -235,25 +234,25 @@ test('blocking scroll on swipe', () => {
     Direction.North,
     Direction.East,
     Direction.East,
-    Direction.East
+    Direction.East,
   ]);
   makeTouchGesture(listItem, [
     Direction.South,
     Direction.East,
     Direction.East,
-    Direction.East
+    Direction.East,
   ]);
   makeTouchGesture(listItem, [
     Direction.North,
     Direction.West,
     Direction.West,
-    Direction.West
+    Direction.West,
   ]);
   makeTouchGesture(listItem, [
     Direction.South,
     Direction.West,
     Direction.West,
-    Direction.West
+    Direction.West,
   ]);
 
   expect(callbackLeft).toHaveBeenCalledTimes(4);
