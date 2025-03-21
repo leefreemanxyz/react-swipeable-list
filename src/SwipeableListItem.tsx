@@ -1,4 +1,4 @@
-import { PureComponent, ReactNode } from "react";
+import { PureComponent, ReactNode, useEffect, useRef, useState } from "react";
 
 import "./SwipeableListItem.css";
 
@@ -8,7 +8,7 @@ export const ActionAnimations = {
   NONE: Symbol("None"),
 };
 
-export enum ActionAnimationsEnum {
+enum ActionAnimationsEnum {
   /**
    * Item returns to start position.
    */
@@ -107,6 +107,387 @@ const DragDirection = {
 };
 
 const FPS_INTERVAL = 1000 / 60;
+
+export const SwipeableListItem2 = (props: ISwipeableListItemProps) => {
+  const { children, swipeLeft, swipeRight, onSwipeStart, onSwipeEnd } = props;
+  const [left, setLeft] = useState(0);
+  const [dragStartPoint, setDragStartPoint] = useState({ x: -1, y: -1 });
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const contentLeftRef = useRef<HTMLDivElement>(null);
+  const contentRightRef = useRef<HTMLDivElement>(null);
+  const listElementRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStartMouse = (event: MouseEvent) => {
+    window.addEventListener("mouseup", handleDragEndMouse);
+    window.addEventListener("mousemove", handleMouseMove);
+
+    wrapperRef.current?.addEventListener("mouseup", handleDragEndMouse);
+    wrapperRef.current?.addEventListener("mousemove", handleMouseMove);
+
+    handleDragStart(event);
+  }
+
+  const handleDragEndMouse = () => {
+    window.removeEventListener("mouseup", handleDragEndMouse);
+    window.removeEventListener("mousemove", handleMouseMove);
+
+    if (wrapperRef.current) {
+      wrapperRef.current.removeEventListener("mouseup", handleDragEndMouse);
+      wrapperRef.current.removeEventListener("mousemove", handleMouseMove);
+    }
+
+    handleDragEnd();
+  }
+
+  const handleDragStartTouch = (event: TouchEvent) => {
+    window.addEventListener("touchend", handleDragEndTouch);
+
+    const touch = event.targetTouches[0];
+    handleDragStart(touch);
+  }
+
+  const handleDragEndTouch = () => {
+    window.removeEventListener("touchend", handleDragEndTouch);
+
+    handleDragEnd();
+  }
+
+  const handleDragStart = ({ clientX, clientY }: MouseEvent | Touch) => {
+    resetState();
+    setDragStartPoint({ x: clientX, y: clientY });
+
+    listElementRef.current?.classList.add("swipeable-list-item__content");
+    if (contentLeftRef.current) {
+      contentLeftRef.current.classList.add("swipeable-list-item__content-left");
+    }
+
+    if (contentRightRef.current) {
+      contentRightRef.current.classList.add("swipeable-list-item__content-right");
+    }
+
+    startTime = Date.now();
+    scheduleUpdatePosition();
+  }
+
+  const scheduleUpdatePosition = () => {
+    if (requestedAnimationFrame) {
+      return;
+    }
+
+    requestedAnimationFrame = requestAnimationFrame(() => {
+      requestedAnimationFrame = null;
+      updatePosition();
+    });
+  }
+
+  const resetState = () => {
+    setDragStartPoint({ x: -1, y: -1 });
+    dragDirection = DragDirection.UNKNOWN;
+    setLeft(0)
+    previousSwipeDistancePercent = 0;
+  }
+
+  const handleDragEnd = () => {
+    const {
+      swipeLeft, swipeRight } = props;
+    let actionTriggered = false;
+
+    if (isSwiping()) {
+      if (listElementRef.current) {
+        if (left < listElementRef.current.offsetWidth * 0.5 * -1) {
+          playActionAnimation(
+            swipeLeft.actionAnimation,
+            DragDirection.LEFT,
+          );
+          handleSwipedLeft();
+          actionTriggered = true;
+        } else if (left > listElementRef.current.offsetWidth * 0.5) {
+          playActionAnimation(
+            swipeRight.actionAnimation,
+            DragDirection.RIGHT,
+          );
+          handleSwipedRight();
+          actionTriggered = true;
+        }
+      }
+
+      if (onSwipeEnd) {
+        onSwipeEnd();
+      }
+    }
+  }
+
+  const playActionAnimation = (type: ActionAnimationsEnum, direction: number) => {
+    if (listElementRef.current) {
+      switch (type) {
+        case ActionAnimationsEnum.REMOVE:
+          playRemoveAnimation(direction);
+          break;
+        case ActionAnimationsEnum.NONE:
+          break;
+        default:
+          playReturnAnimation();
+      }
+    }
+  }
+
+  const playRemoveAnimation = (direction: number) => {
+    if (listElementRef.current) {
+      listElementRef.current.className =
+        "swipeable-list-item__content swipeable-list-item__content--remove";
+      listElementRef.current.style.transform = `translateX(${listElementRef.current.offsetWidth * (direction === DragDirection.LEFT ? -1 : 1)
+        }px)`;
+    }
+  }
+
+  const playReturnAnimation = () => {
+    if (listElementRef.current) {
+      listElementRef.current.className =
+        "swipeable-list-item__content swipeable-list-item__content--return";
+      listElementRef.current.style.transform = "translateX(0px)";
+    }
+
+    if (contentLeftRef.current) {
+      contentLeftRef.current.style.opacity = 0;
+      contentLeftRef.current.className =
+        "swipeable-list-item__content-left swipeable-list-item__content-left--return";
+    }
+
+    if (contentRightRef.current) {
+      contentRightRef.current.style.opacity = 0;
+      contentRightRef.current.className =
+        "swipeable-list-item__content-right swipeable-list-item__content-right--return";
+    }
+  }
+
+  const handleMouseMove = (event: MouseEvent) => {
+    if (dragStartedWithinItem()) {
+      const { clientX, clientY } = event;
+
+      setDragDirection(clientX, clientY);
+
+      if (isSwiping()) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        setLeft(clientX - dragStartPoint.x);
+        scheduleUpdatePosition();
+      }
+    }
+  }
+
+  const handleTouchMove = (event: TouchEvent) => {
+    if (dragStartedWithinItem()) {
+      const { clientX, clientY } = event.targetTouches[0];
+
+      setDragDirection(clientX, clientY);
+
+      if (!event.cancelable) {
+        return;
+      }
+
+      if (isSwiping()) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        setLeft(clientX - dragStartPoint.x);
+        scheduleUpdatePosition();
+      }
+    }
+  }
+
+
+
+  const dragHorizontalDirectionThreshold = 10;
+  const dragVerticalDirectionThreshold = 10;
+
+  let dragDirection = DragDirection.UNKNOWN;
+  let previousSwipeDistancePercent = 0;
+  let startTime = null;
+  let requestedAnimationFrame = null;
+
+  const isSwiping = () => {
+    const { blockSwipe } = props;
+    const horizontalDrag =
+      dragDirection === DragDirection.LEFT ||
+      dragDirection === DragDirection.RIGHT;
+    return !blockSwipe && dragStartedWithinItem() && horizontalDrag;
+  }
+
+  const dragStartedWithinItem = () => {
+    const { x, y } = dragStartPoint;
+    return x !== -1 && y !== -1;
+  }
+
+
+  const onlyLeftContent = contentLeftRef.current !== null && contentRightRef.current === null;
+  const onlyRightContent = contentLeftRef.current === null && contentRightRef.current !== null;
+
+  const updatePosition = () => {
+    const now = Date.now();
+    const elapsed = now - startTime;
+
+    if (elapsed > FPS_INTERVAL && isSwiping()) {
+      let contentToShow = left < 0 ? contentLeftRef.current : contentRightRef.current;
+
+      if (onlyLeftContent && left > 0) {
+        setLeft(0); contentToShow = contentLeftRef.current;
+      }
+
+      if (onlyRightContent && left < 0) {
+        setLeft(0); contentToShow = contentRightRef.current;
+      }
+
+      if (!contentToShow) {
+        return;
+      }
+
+      if (listElementRef.current) {
+        listElementRef.current.style.transform = `translateX(${left}px)`;
+      }
+
+      const opacity = (Math.abs(left) / 100).toFixed(2);
+
+      if (props.onSwipeProgress && listElementRef.current) {
+        const listElementWidth = listElementRef.current.offsetWidth;
+        let swipeDistancePercent = previousSwipeDistancePercent;
+
+        if (listElementWidth !== 0) {
+          const swipeDistance = Math.max(
+            0,
+            listElementWidth - Math.abs(left),
+          );
+
+          swipeDistancePercent =
+            100 - Math.round((100 * swipeDistance) / listElementWidth);
+        }
+
+        if (previousSwipeDistancePercent !== swipeDistancePercent) {
+          props.onSwipeProgress(swipeDistancePercent);
+          previousSwipeDistancePercent = swipeDistancePercent;
+        }
+      }
+
+      if (opacity < 1 && opacity.toString() !== contentToShow.style.opacity) {
+        contentToShow.style.opacity = opacity.toString();
+
+        let contentToHide =
+          left < 0 ? contentRightRef.current : contentLeftRef.current;
+
+        if (contentToHide) {
+          contentToHide.style.opacity = "0";
+        }
+      }
+
+      if (opacity >= 1) {
+        contentToShow.style.opacity = "1";
+      }
+
+      startTime = Date.now();
+    }
+  }
+
+  const setDragDirection = (x: number, y: number) => {
+    if (dragDirection === DragDirection.UNKNOWN) {
+      const { x: startX, y: startY } = dragStartPoint;
+      const horizontalDistance = Math.abs(x - startX);
+      const verticalDistance = Math.abs(y - startY);
+
+      if (
+        horizontalDistance <= dragHorizontalDirectionThreshold &&
+        verticalDistance <= dragVerticalDirectionThreshold
+      ) {
+        return;
+      }
+
+      const angle = Math.atan2(y - startY, x - startX);
+      const octant = Math.round((8 * angle) / (2 * Math.PI) + 8) % 8;
+
+      switch (octant) {
+        case 0:
+          if (
+            contentRightRef.current !== null &&
+            horizontalDistance > dragHorizontalDirectionThreshold
+          ) {
+            dragDirection = DragDirection.RIGHT;
+          }
+          break;
+        case 1:
+        case 2:
+        case 3:
+          if (verticalDistance > dragVerticalDirectionThreshold) {
+            dragDirection = DragDirection.DOWN;
+          }
+          break;
+        case 4:
+          if (
+            contentLeftRef.current !== null &&
+            horizontalDistance > dragHorizontalDirectionThreshold
+          ) {
+            dragDirection = DragDirection.LEFT;
+          }
+          break;
+        case 5:
+        case 6:
+        case 7:
+          if (verticalDistance > dragVerticalDirectionThreshold) {
+            dragDirection = DragDirection.UP;
+          }
+          break;
+      }
+
+      if (onSwipeStart && isSwiping()) {
+        onSwipeStart();
+      }
+    }
+  }
+  useEffect(() => {
+    const abortController = new AbortController();
+
+
+    wrapperRef.current?.addEventListener("mousedown", handleDragStartMouse, { signal: abortController.signal });
+    wrapperRef.current?.addEventListener("touchstart", handleDragStartTouch, { signal: abortController.signal });
+    wrapperRef.current?.addEventListener("touchend", handleDragEndTouch, { signal: abortController.signal });
+    wrapperRef.current?.addEventListener("touchmove", handleTouchMove, { signal: abortController.signal });
+    return () => {
+      abortController.abort();
+    }
+  }, [])
+
+  return (
+    <div className="swipeable-list-item" ref={wrapperRef}>
+      {swipeLeft && (
+        <div
+          className="swipeable-list-item__content-left"
+          data-testid="swipe-left-content"
+          ref={contentLeftRef}
+        >
+          {swipeLeft.content}
+        </div>
+      )}
+      {swipeRight && (
+        <div
+          className="swipeable-list-item__content-right"
+          data-testid="swipe-right-content"
+          ref={contentRightRef}
+        >
+          {swipeRight.content}
+        </div>
+      )}
+      <div
+        className="swipeable-list-item__content"
+        data-testid="content"
+        ref={listElementRef}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
+
+
+
 
 class SwipeableListItem extends PureComponent {
   constructor(props: ISwipeableListItemProps) {
@@ -554,17 +935,5 @@ class SwipeableListItem extends PureComponent {
   }
 }
 
-interface SwipeableListItemProps {
-  blockSwipe?: boolean;
-  children: React.ReactNode;
-  swipeLeft?: SwipeAction;
-  swipeRight?: SwipeAction;
-  scrollStartThreshold?: number;
-  swipeStartThreshold?: number;
-  threshold?: number;
-  onSwipeEnd?: () => void;
-  onSwipeProgress?: (progress: number) => void;
-  onSwipeStart?: () => void;
-}
 
 export default SwipeableListItem;

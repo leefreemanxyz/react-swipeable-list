@@ -11,11 +11,16 @@ export const Direction = {
   SouthWest: 6,
   West: 7,
   NorthWest: 8,
-};
+} as const;
 
 const startPoint = () => ({ clientX: 50, clientY: 25 });
 
-const movePoint = (point, direction) => {
+type Point = {
+  clientX: number,
+  clientY: number
+}
+
+const movePoint = (point: Point, direction: any) => {
   const { clientX, clientY } = point;
 
   switch (direction) {
