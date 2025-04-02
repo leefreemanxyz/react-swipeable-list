@@ -25,14 +25,14 @@
     "touchscreen"
   ],
   "peerDependencies": {
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.2.0",
-    "@types/react": "19.0.12",
-    "@types/react-dom": "19.0.4",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1",
     "@vitejs/plugin-react": "4.3.4",
     "eslint": "9.23.0",
     "eslint-plugin-react-hooks": "5.2.0",
@@ -42,8 +42,8 @@
     "husky": "9.1.7",
     "lint-staged": "15.5.0",
     "prettier": "3.5.3",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "typescript": "5.8.2",
     "typescript-eslint": "8.27.0",
     "vite": "6.2.2",
